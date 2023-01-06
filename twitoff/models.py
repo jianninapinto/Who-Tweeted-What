@@ -14,6 +14,8 @@ class User(DB.Model):
     id = DB.Column(DB.BigInteger, primary_key=True, nullable=False)
     # username column
     username = DB.Column(DB.String, nullable=False)
+    # most recent tweet id
+    newest_tweet_id = DB.Column(DB.BigInteger)
 
     def __repr__(self):
         return f"User: {self.username}"
@@ -27,6 +29,8 @@ class Tweet(DB.Model):
     # allows for text, emojis and links
     text = DB.Column(DB.Unicode(300), nullable=False)
     # create a relationship between Users and a Tweets
+    # store our word embeddings "vectorization"
+    vect = DB.Column(DB.PickleType, nullable=False)
     # user_id column (foreign / secondary key)
     user_id = DB.Column(DB.BigInteger, DB.ForeignKey(
         "user.id"), nullable=False)

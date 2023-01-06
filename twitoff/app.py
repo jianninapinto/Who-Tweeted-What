@@ -1,5 +1,6 @@
 from flask import Flask, render_template
 from .models import DB, User, Tweet
+from .twitter import add_or_update_user
 
 
 def create_app():
@@ -21,16 +22,6 @@ def create_app():
         users = User.query.all()
         return render_template("base.html", title="Home", users=users)
 
-    app_title = "Who Tweeted What?"
-
-    @app.route("/test")
-    def test():
-        return f"<p>Another {app_title} page</p>"
-
-    @app.route('/hola')
-    def hola():
-        return "Hola, Twitoff!"
-
     @app.route("/reset")
     def reset():
         # Drop all database tables
@@ -38,55 +29,37 @@ def create_app():
         # Recreate all database tables according to
         # the indicated schemas in models.py
         DB.create_all()
-        return """The database has been reset.
-        <a href='/'>Go to Home</a>
-        <a href='/reset'>Go to reset</a>
-        <a href='/populate'>Go to populate</a>"""
+        return render_template('base.html', title='Reset Database')
 
     @app.route("/populate")
     def populate():
         # Create two fake users in the DB
-        james = User(id=1, username="James")
-        ashley = User(id=2, username="Ashley")
-        # Insert information into the DB
-        DB.session.add(james)
-        DB.session.add(ashley)
+        add_or_update_user('BarackObama')
+        add_or_update_user('elonmusk')
+        add_or_update_user('justinbieber')
+        add_or_update_user('rihanna')
+        add_or_update_user('Cristiano')
+        add_or_update_user('taylorswift13')
+        add_or_update_user('KimKardashian')
+        add_or_update_user('NASA')
+        add_or_update_user('BillGates')
+        add_or_update_user('Oprah')
 
-        # Create six (6) fake tweets in the DB
-        tweet1 = Tweet(
-            id=1, text="""We build an ice castle by hand every winter
-            just by using water, icicles and a little magic.""", user=james)
-        tweet2 = Tweet(
-            id=2, text="Missing that warm summer weather right now.",
-            user=ashley)
-        tweet3 = Tweet(
-            id=3, text="""Drinking hot cocoa during snowy days is
-            my favorite thing.""", user=james)
-        tweet4 = Tweet(
-            id=4, text="""Today, the first snow of the year fell in my city.
-            ❄️☃️ I really love seeing the snow fall! 😆""", user=james)
-        tweet5 = Tweet(
-            id=5, text="""I just want to escape to the 🌊 ocean.
-            It brings me such a calm, relaxing peace that compares
-            to nothing else in this world!""", user=ashley)
-        tweet6 = Tweet(
-            id=6, text="""Dreaming about taking a nap in a hammock
-            strung between two palm trees.""", user=ashley)
-        # Insert information into the DB
-        DB.session.add(tweet1)
-        DB.session.add(tweet2)
-        DB.session.add(tweet3)
-        DB.session.add(tweet4)
-        DB.session.add(tweet5)
-        DB.session.add(tweet6)
+        # Save the changes we just made to the database
+        # DB.session.commit()
 
-        # Save the changes made to the database
-        DB.session.commit()
+        return render_template('base.html', title='Populate Database')
 
-        return """Created some users.
-        <a href='/'>Go to Home</a>
-        <a href='/reset'>Go to reset</a>
-        <a href='/populate'>Go to populate</a>"""
+    @app.route("/update")
+    def update():
+        """Updates all users"""
+        # Get list of usernames of all users
+        users = User.query.all()
+        usernames = [user.username for user in users]
+        for username in usernames:
+            add_or_update_user(username)
 
+        return render_template('base.html', title='Users Updated')
+        
     # return our app object after attaching the routes to it
     return app
