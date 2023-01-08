@@ -5,39 +5,53 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>TwitOff - {{ title }}</title>
+    <title>Who Tweeted What? - {{ title }}</title>
     <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
   </head>
 
 <body>
-    <nav class="mt-2 flex justify-between">
-        <a href="/" class="ml-2"><span><b>Who Tweeted What?</b></span></a>
+    <nav class="mt-2 flex justify-between border-b border-gray-200 pb-2">
+        <a href="/" class="ml-2"><span><b><i>Who Tweeted What?</i></b></span></a>
         <div>
             <a href="/reset" class="p-2 focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">Reset Database</a>
             <a href="/update" class="p-2 focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Update Tweets</a>
         </div>
     </nav>
     
-   {% block content %}
-   {% for user in users %}
-    <div class="bg-gray-50 dark:bg-black p-10 flex items-center justify-center">
-        <div class="max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow-md dark:bg-gray-800 dark:border-gray-700">
-        <div class="flex justify-between">
-            <div class="flex items-center">
-            <div class="ml-1.5 text-sm leading-tight">
-                <span class="text-blue-400 dark:text-white font-bold block ">{{ user.username }}</span>
-                <span class="text-gray-500 dark:text-gray-400 font-normal block">{{ user.screen_name }}</span>
+    <article class="flex mb-4" style="padding: 3em 1em;">
+        {% block content %}
+        <div class="m-8 w-1/2 h-12">
+          <h1 class="mb-6"><b>{{ title }}</b></h1>
+          <form action="/compare" method="post">
+            <select name="user0" class="mb-6 p-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+              {% for user in users %}
+              <option value="{{ user.username }}">{{ user.username }}</option>
+              {% endfor %}
+            </select>
+            <select name="user1" class="mb-6 p-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+              {% for user in users %}
+              <option value="{{ user.username }}">{{ user.username }}</option>
+              {% endfor %}
+            </select>
+            <input type="text" name="tweet_text" class="mb-6 p-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Tweet text to predict">
+            <input type="submit" value="Compare Users" class="mb-6 p-2 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+          </form>
+        </div>
+        <div class="m-8 w-1/2 h-12"\>
+          <h2 class="mb-6"><b>Users</b></h2>
+          <ul>
+          {% for user in users %}
+          <li><a class="no-underline hover:underline" href="/user/{{ user.username }}"><span class="stack">{{ user.username }}</span></a></li>
+          {% endfor %}</ul>
+          <form action="/user" method="post">
+            <div class="mt-6">
+            <input type="text" name="user_name" class="mb-6 p-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="User to add">
+            <input type="submit" value="Add User" class="mb-6 p-2 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
             </div>
-            </div>
-            <svg class="text-blue-400 dark:text-white h-6 w-auto inline-block fill-current" viewBox="0 0 24 24"><g><path d="M23.643 4.937c-.835.37-1.732.62-2.675.733.962-.576 1.7-1.49 2.048-2.578-.9.534-1.897.922-2.958 1.13-.85-.904-2.06-1.47-3.4-1.47-2.572 0-4.658 2.086-4.658 4.66 0 .364.042.718.12 1.06-3.873-.195-7.304-2.05-9.602-4.868-.4.69-.63 1.49-.63 2.342 0 1.616.823 3.043 2.072 3.878-.764-.025-1.482-.234-2.11-.583v.06c0 2.257 1.605 4.14 3.737 4.568-.392.106-.803.162-1.227.162-.3 0-.593-.028-.877-.082.593 1.85 2.313 3.198 4.352 3.234-1.595 1.25-3.604 1.995-5.786 1.995-.376 0-.747-.022-1.112-.065 2.062 1.323 4.51 2.093 7.14 2.093 8.57 0 13.255-7.098 13.255-13.254 0-.2-.005-.402-.014-.602.91-.658 1.7-1.477 2.323-2.41z"></path></g></svg>
+        </form>
         </div>
-        <p class="text-black dark:text-white block text-xl leading-snug mt-3">{{ user.tweets[0].text }}</p>
-        <div class="text-gray-500 dark:text-gray-400 flex mt-3">
-        </div>
-        </div>
-    </div>
-    {% endfor %}
-    {% endblock %}
+        {% endblock %}
+      </article>
     <!-- <script src="https://cdn.jsdelivr.net/npm/umbrellajs"/> -->
 
 </body>

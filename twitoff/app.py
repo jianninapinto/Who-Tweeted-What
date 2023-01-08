@@ -1,6 +1,7 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from .models import DB, User, Tweet
 from .twitter import add_or_update_user
+from .predict import predict_user
 
 
 def create_app():
@@ -31,24 +32,6 @@ def create_app():
         DB.create_all()
         return render_template('base.html', title='Reset Database')
 
-    @app.route("/populate")
-    def populate():
-        # Create two fake users in the DB
-        add_or_update_user('BarackObama')
-        add_or_update_user('elonmusk')
-        add_or_update_user('justinbieber')
-        add_or_update_user('rihanna')
-        add_or_update_user('Cristiano')
-        add_or_update_user('taylorswift13')
-        add_or_update_user('KimKardashian')
-        add_or_update_user('NASA')
-        add_or_update_user('BillGates')
-        add_or_update_user('Oprah')
-
-        # Save the changes we just made to the database
-        # DB.session.commit()
-
-        return render_template('base.html', title='Populate Database')
 
     @app.route("/update")
     def update():
@@ -60,6 +43,44 @@ def create_app():
             add_or_update_user(username)
 
         return render_template('base.html', title='Users Updated')
+
+    @app.route('/user', methods=['POST'])
+    @app.route('/user/<username>', methods=['GET'])
+    def user(username=None, message=''):
+        
+        username = username or request.values['user_name']
+
+        try:
+            if request.method == 'POST':
+                add_or_update_user(username)
+                message =  f'User "{username}" has been successfully added!'
+
+            tweets = User.query.filter(User.username==username).one().tweets
+
+        except Exception as e:
+            message = f'Error adding {username}: {e}'
+            tweets = []
+
+        return render_template('user.html', title=username, tweets=tweets, message=message)
+
+    @app.route('/compare', methods=['POST'])
+    def compare():
+
+        user0, user1 = sorted([request.values['user0'], request.values['user1']])
+        hypo_tweet_text = request.values['tweet_text']
+
+        if user0 == user1:
+            message = 'Cannot compare a user to themselves!'
+        else:
+            prediction = predict_user(user0, user1, hypo_tweet_text)
+
+            # Get into the if statement if the prediction is user1
+            if prediction:
+                message = f'"{hypo_tweet_text}" is more likely to be said by {user1} than by {user0}.'
+            else:
+                message = f'"{hypo_tweet_text}" is more likely to be said by {user0} than by {user1}.'
+                
+        return render_template('prediction.html', title='Prediction', message=message)    
         
     # return our app object after attaching the routes to it
     return app

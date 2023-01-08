@@ -10,6 +10,8 @@ flask-sqlalchemy = "*"
 python-dotenv = "*"
 tweepy = "*"
 spacy = "*"
+numpy = "*"
+scikit-learn = "*"
 
 [dev-packages]
 
