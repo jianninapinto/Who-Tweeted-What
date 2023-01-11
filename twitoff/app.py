@@ -53,9 +53,9 @@ def create_app():
         try:
             if request.method == 'POST':
                 add_or_update_user(username)
-                message =  f'User "{username}" has been successfully added!'
+                message = f'User "{username}" has been successfully added!'
 
-            tweets = User.query.filter(User.username==username).one().tweets
+            tweets = User.query.filter(User.username == username).one().tweets
 
         except Exception as e:
             message = f'Error adding {username}: {e}'
@@ -70,17 +70,18 @@ def create_app():
         hypo_tweet_text = request.values['tweet_text']
 
         if user0 == user1:
-            message = 'Cannot compare a user to themselves!'
+            message = 'Cannot compare users to themselves!'
         else:
             prediction = predict_user(user0, user1, hypo_tweet_text)
-
             # Get into the if statement if the prediction is user1
-            if prediction:
-                message = f'"{hypo_tweet_text}" is more likely to be said by {user1} than by {user0}.'
-            else:
-                message = f'"{hypo_tweet_text}" is more likely to be said by {user0} than by {user1}.'
-                
-        return render_template('prediction.html', title='Prediction', message=message)    
+            message = '''"{}" is more likely to
+            be said by {}
+            than by {}'''.format(hypo_tweet_text,
+                                 user1 if prediction else user0, 
+                                 user0 if prediction else user1)
+                 
+        return render_template(
+            'prediction.html', title='Prediction', message=message)    
         
     # return our app object after attaching the routes to it
     return app

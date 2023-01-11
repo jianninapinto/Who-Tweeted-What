@@ -17,21 +17,29 @@ def predict_user(user0_username, user1_username, hypo_tweet_text):
     user1 = User.query.filter(User.username == user1_username).one()
 
     # Grab tweet vectors or word embeddings from each tweet for each user
-    user0_vects = np.array([ tweet.vect for tweet in user0.tweets])
+    user0_vects = np.array([tweet.vect for tweet in user0.tweets])
     user1_vects = np.array([tweet.vect for tweet in user1.tweets])
 
-    # Vertically stack tweet vects to get one np array. (The X matrix)
+    # Vertically stack tweet vects to get one np array
+    # (The X matrix for training the logistic regression model)
     vects = np.vstack([user0_vects, user1_vects])
 
-    # Concatenate the labels of 0 or 1 for each tweet. (The y target )
-    labels = np.concatenate([np.zeros(user0_vects.shape[0]), np.ones(user1_vects.shape[0])])
+    # Concatenate the labels of 0 or 1 for each tweet
+    # (The y vector or target for training the logistic regression model)
+    zeroes = np.zeros(len(user0.tweets))
+    ones = np.ones(len(user1.tweets))
 
-    # Instantiate and fit the model with our X's == vects & our y's == labels
+    labels = np.concatenate([zeroes, ones])
+
+    # Instantiate and train the model with our X's == vects & our y's == labels
     log_reg = LogisticRegression().fit(vects, labels)
 
-    # Vectorize the hypothetical tweet text to pass into .predict()
-    hypo_tweet_vect = vectorize_tweet(hypo_tweet_text).reshape(1, -1)
+    # Vectorize (get the word embeddings for) the hypothetical tweet text 
+    # to pass into .predict()
+    hypo_tweet_vect = vectorize_tweet(hypo_tweet_text)
 
-
-    return log_reg.predict(hypo_tweet_vect)
+    # Get a prediction for which user is more likely to say the hypo_tweet_text
+    prediction = log_reg.predict(hypo_tweet_vect.reshape(1, -1))
+    
+    return prediction[0]
 
